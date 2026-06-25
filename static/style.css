@@ -439,12 +439,12 @@ html[data-theme="dark"] .top-bar {
     z-index: 80;
     display: flex;
     align-items: flex-end;
-    justify-content: center;
-    gap: clamp(0.28rem, 0.65vw, 0.58rem);
-    width: auto;
-    max-width: min(calc(100vw - 1.2rem), 1040px);
-    min-height: 94px;
-    padding: 0.62rem 0.78rem 0.56rem;
+    justify-content: flex-start;
+    gap: clamp(0.2rem, 0.42vw, 0.44rem);
+    width: max-content;
+    max-width: calc(100vw - 1.25rem);
+    min-height: 88px;
+    padding: 0.58rem 0.72rem 0.52rem;
     transform: translateX(-50%);
     background: var(--dock-bg);
     border: 1px solid var(--dock-border);
@@ -457,6 +457,7 @@ html[data-theme="dark"] .top-bar {
     overflow-x: auto;
     overflow-y: visible;
     scrollbar-width: none;
+    scroll-padding-inline: 0.72rem;
 }
 
 .app-item {
@@ -469,8 +470,8 @@ html[data-theme="dark"] .top-bar {
     padding: 0;
     cursor: pointer;
     gap: 0.28rem;
-    min-height: 78px;
-    min-width: calc(64px * var(--dock-scale));
+    min-height: 74px;
+    min-width: calc(58px * var(--dock-scale));
     background: transparent;
     border: 0;
     box-shadow: none;
@@ -480,13 +481,13 @@ html[data-theme="dark"] .top-bar {
 }
 
 .app-icon {
-    width: calc(48px * var(--dock-scale));
-    height: calc(48px * var(--dock-scale));
+    width: calc(44px * var(--dock-scale));
+    height: calc(44px * var(--dock-scale));
     border-radius: calc(12px * var(--dock-scale));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: calc(1.28rem * var(--dock-scale));
+    font-size: calc(1.18rem * var(--dock-scale));
     color: white;
     position: relative;
     overflow: hidden;
@@ -519,14 +520,15 @@ html[data-theme="dark"] .top-bar {
     opacity: 1;
     pointer-events: none;
     padding: 0;
-    max-width: 68px;
+    width: 56px;
+    max-width: 56px;
     background: transparent;
     color: rgba(255, 255, 255, 0.92);
     font-weight: 700;
-    font-size: 0.62rem;
+    font-size: 0.58rem;
     line-height: 1.1;
     text-align: center;
-    white-space: normal;
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
