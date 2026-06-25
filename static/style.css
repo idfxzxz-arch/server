@@ -32,6 +32,9 @@
     --radius-lg: 8px;
     --radius-md: 8px;
     --shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+    --dock-bg: rgba(255, 255, 255, 0.42);
+    --dock-border: rgba(255, 255, 255, 0.58);
+    --dock-label: rgba(15, 23, 42, 0.82);
 }
 
 html[data-theme="dark"] {
@@ -64,6 +67,9 @@ html[data-theme="dark"] {
     --disk-color: #fbbf24;
     --net-color: #60a5fa;
     --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+    --dock-bg: rgba(22, 24, 30, 0.58);
+    --dock-border: rgba(255, 255, 255, 0.16);
+    --dock-label: rgba(248, 250, 252, 0.86);
 }
 
 * {
@@ -89,22 +95,26 @@ body {
     width: 100%;
     height: 100%;
     background:
-        linear-gradient(90deg, rgba(37, 99, 235, 0.06), transparent 32%),
-        linear-gradient(180deg, #f8fafc 0%, #eef4fb 100%);
+        radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.75), transparent 18%),
+        radial-gradient(circle at 76% 18%, rgba(125, 211, 252, 0.34), transparent 24%),
+        radial-gradient(circle at 70% 74%, rgba(196, 181, 253, 0.45), transparent 28%),
+        linear-gradient(135deg, #f8fafc 0%, #dbeafe 38%, #f5d0fe 100%);
     z-index: -1;
 }
 
 html[data-theme="dark"] .wallpaper {
     background:
-        linear-gradient(90deg, rgba(96, 165, 250, 0.1), transparent 36%),
-        linear-gradient(180deg, #0b1018 0%, #111827 100%);
+        radial-gradient(circle at 14% 12%, rgba(56, 189, 248, 0.25), transparent 24%),
+        radial-gradient(circle at 82% 18%, rgba(168, 85, 247, 0.22), transparent 26%),
+        radial-gradient(circle at 62% 78%, rgba(14, 165, 233, 0.18), transparent 30%),
+        linear-gradient(135deg, #07111f 0%, #111827 48%, #1e1b4b 100%);
 }
 
 .app-container {
     height: 100%;
     display: flex;
     flex-direction: column;
-    padding: 1.1rem clamp(1rem, 2vw, 1.75rem);
+    padding: 0.7rem clamp(1rem, 2vw, 1.75rem) 7.8rem;
     overflow-y: auto;
 }
 
@@ -114,13 +124,19 @@ html[data-theme="dark"] .wallpaper {
     justify-content: space-between;
     align-items: center;
     gap: 1.25rem;
-    margin-bottom: 1rem;
-    background: var(--topbar-bg);
-    padding: 0.75rem 0.85rem;
-    border-radius: var(--radius-lg);
-    backdrop-filter: blur(14px);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow);
+    margin: -0.7rem calc(clamp(1rem, 2vw, 1.75rem) * -1) 1rem;
+    background: rgba(255, 255, 255, 0.38);
+    padding: 0.46rem clamp(1rem, 2vw, 1.75rem);
+    border-radius: 0;
+    backdrop-filter: blur(24px) saturate(1.5);
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: none;
+}
+
+html[data-theme="dark"] .top-bar {
+    background: rgba(7, 12, 22, 0.48);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
 }
 
 .top-actions {
@@ -137,8 +153,8 @@ html[data-theme="dark"] .wallpaper {
 }
 
 .brand-mark {
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     border-radius: 8px;
     display: grid;
     place-items: center;
@@ -150,14 +166,14 @@ html[data-theme="dark"] .wallpaper {
 }
 
 .brand-name {
-    font-size: 1.2rem;
+    font-size: 0.98rem;
     font-weight: 800;
     letter-spacing: 0;
     line-height: 1;
 }
 
 .brand-subtitle {
-    display: block;
+    display: none;
     color: var(--text-muted);
     font-size: 0.78rem;
     margin-top: 0.25rem;
@@ -165,14 +181,14 @@ html[data-theme="dark"] .wallpaper {
 }
 
 .clock-widget h1 {
-    font-size: 1.35rem;
+    font-size: 0.95rem;
     font-weight: 800;
     line-height: 1;
     text-align: right;
 }
 
 #clock-date {
-    display: block;
+    display: none;
     font-size: 0.82rem;
     color: var(--text-muted);
     font-weight: 500;
@@ -191,11 +207,11 @@ html[data-theme="dark"] .wallpaper {
     display: flex;
     align-items: center;
     gap: 0.55rem;
-    min-height: 34px;
+    min-height: 28px;
     padding: 0 0.7rem;
     border-radius: 8px;
-    background: var(--status-bg);
-    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     font-size: 0.84rem;
     color: var(--text-soft);
 }
@@ -206,8 +222,8 @@ html[data-theme="dark"] .wallpaper {
 }
 
 .logout-btn {
-    width: 36px;
-    height: 36px;
+    width: 30px;
+    height: 30px;
     display: grid;
     place-items: center;
     background: var(--danger-bg);
@@ -223,8 +239,8 @@ html[data-theme="dark"] .wallpaper {
 }
 
 .theme-toggle {
-    width: 36px;
-    height: 36px;
+    width: 30px;
+    height: 30px;
     display: grid;
     place-items: center;
     background: var(--status-bg);
@@ -261,17 +277,17 @@ html[data-theme="dark"] .wallpaper {
 /* Main Layout */
 .widgets-area {
     display: grid;
-    grid-template-columns: repeat(6, minmax(150px, 1fr));
-    gap: 0.75rem;
+    grid-template-columns: repeat(6, minmax(145px, 1fr));
+    gap: 0.8rem;
     margin-bottom: 1rem;
 }
 
 .widget-card {
-    padding: 0.9rem;
+    padding: 0.95rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 170px;
+    min-height: 168px;
     position: relative;
     overflow: hidden;
 }
@@ -280,7 +296,7 @@ html[data-theme="dark"] .wallpaper {
     content: '';
     position: absolute;
     inset: 0;
-    border-top: 3px solid var(--accent-soft);
+    border-top: 1px solid rgba(255, 255, 255, 0.42);
     pointer-events: none;
 }
 
@@ -405,12 +421,7 @@ html[data-theme="dark"] .wallpaper {
 
 /* Apps Grid */
 .apps-grid-title {
-    margin: 0.9rem 0 0.7rem;
-    border-left: 0;
-    padding-left: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: none;
 }
 
 .apps-grid-title h2 {
@@ -422,42 +433,131 @@ html[data-theme="dark"] .wallpaper {
 }
 
 .apps-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(156px, 1fr));
-    gap: 0.75rem;
+    position: fixed;
+    left: 50%;
+    bottom: max(0.85rem, env(safe-area-inset-bottom));
+    z-index: 80;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: clamp(0.28rem, 0.65vw, 0.58rem);
+    width: auto;
+    max-width: min(calc(100vw - 1.2rem), 1040px);
+    min-height: 82px;
+    padding: 0.72rem 0.82rem 0.58rem;
+    transform: translateX(-50%);
+    background: var(--dock-bg);
+    border: 1px solid var(--dock-border);
+    border-radius: 26px;
+    box-shadow:
+        0 22px 60px rgba(15, 23, 42, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.42),
+        inset 0 -1px 0 rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(26px) saturate(1.6);
+    overflow-x: auto;
+    overflow-y: visible;
+    scrollbar-width: none;
 }
 
 .app-item {
-    display: grid;
-    grid-template-columns: 42px minmax(0, 1fr);
-    grid-template-rows: 1fr;
+    --dock-scale: 1;
+    display: flex;
+    position: relative;
     flex-direction: column;
     align-items: center;
-    justify-content: start;
-    padding: 0.75rem;
+    justify-content: flex-end;
+    padding: 0;
     cursor: pointer;
-    gap: 0.75rem;
-    min-height: 66px;
+    gap: 0.34rem;
+    min-height: 62px;
+    min-width: calc(54px * var(--dock-scale));
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    transform: translateY(calc((1 - var(--dock-scale)) * 9px));
+    transform-origin: bottom center;
+    transition: min-width 0.12s ease, transform 0.12s ease;
 }
 
 .app-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 8px;
+    width: calc(54px * var(--dock-scale));
+    height: calc(54px * var(--dock-scale));
+    border-radius: calc(13px * var(--dock-scale));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
+    font-size: calc(1.42rem * var(--dock-scale));
     color: white;
-    box-shadow: none;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        0 calc(8px * var(--dock-scale)) calc(18px * var(--dock-scale)) rgba(15, 23, 42, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.44),
+        inset 0 -8px 18px rgba(0, 0, 0, 0.16);
+    transition: width 0.12s ease, height 0.12s ease, border-radius 0.12s ease, font-size 0.12s ease;
+}
+
+.app-icon::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(145deg, rgba(255, 255, 255, 0.48), transparent 36%),
+        radial-gradient(circle at 50% 110%, rgba(255, 255, 255, 0.26), transparent 38%);
+    pointer-events: none;
+}
+
+.app-icon img,
+.app-icon i {
+    position: relative;
+    z-index: 1;
 }
 
 .app-name {
-    font-weight: 750;
-    font-size: 0.9rem;
-    text-align: left;
-    color: var(--ink);
-    overflow-wrap: anywhere;
+    position: absolute;
+    bottom: calc(100% + 0.72rem);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    opacity: 0;
+    pointer-events: none;
+    padding: 0.34rem 0.54rem;
+    border-radius: 7px;
+    background: var(--dock-label);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.76rem;
+    text-align: center;
+    white-space: nowrap;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
+    transition: opacity 0.12s ease, transform 0.12s ease;
+}
+
+.app-item:hover .app-name {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.app-item::after {
+    content: '';
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.88);
+    opacity: 0.68;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.22);
+}
+
+.app-item.dragging {
+    opacity: 0.55;
+}
+
+.app-item.dock-bounce .app-icon {
+    animation: dock-bounce 0.38s cubic-bezier(0.2, 0.72, 0.2, 1.2);
+}
+
+@keyframes dock-bounce {
+    0%, 100% { transform: translateY(0); }
+    45% { transform: translateY(-16px); }
 }
 
 @media (max-width: 768px) {
@@ -495,7 +595,21 @@ html[data-theme="dark"] .wallpaper {
     }
 
     .apps-grid {
-        grid-template-columns: 1fr;
+        max-width: calc(100vw - 0.8rem);
+        min-height: 70px;
+        padding: 0.58rem 0.64rem 0.48rem;
+        border-radius: 22px;
+        justify-content: flex-start;
+    }
+
+    .app-item {
+        min-width: calc(46px * var(--dock-scale));
+    }
+
+    .app-icon {
+        width: calc(46px * var(--dock-scale));
+        height: calc(46px * var(--dock-scale));
+        font-size: calc(1.18rem * var(--dock-scale));
     }
 }
 

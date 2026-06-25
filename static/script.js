@@ -613,10 +613,34 @@ function loadDashboardApps() {
 
 function renderDashboardApps(apps) {
     const grid = document.getElementById('apps-grid');
+    const iconTheme = {
+        files: { icon: 'fa-solid fa-face-smile', bg: 'linear-gradient(135deg,#38bdf8,#2563eb 52%,#1e40af)' },
+        terminal: { icon: 'fa-solid fa-terminal', bg: 'linear-gradient(135deg,#111827,#334155 58%,#020617)' },
+        docker: { icon: 'fa-brands fa-docker', bg: 'linear-gradient(135deg,#60a5fa,#0284c7 58%,#075985)' },
+        metrics: { icon: 'fa-solid fa-chart-line', bg: 'linear-gradient(135deg,#facc15,#f97316 58%,#b45309)' },
+        security: { icon: 'fa-solid fa-shield-halved', bg: 'linear-gradient(135deg,#fb7185,#e11d48 58%,#9f1239)' },
+        network: { icon: 'fa-solid fa-network-wired', bg: 'linear-gradient(135deg,#34d399,#10b981 52%,#047857)' },
+        storage: { icon: 'fa-solid fa-hard-drive', bg: 'linear-gradient(135deg,#a78bfa,#6366f1 58%,#4338ca)' },
+        websites: { icon: 'fa-solid fa-compass', bg: 'linear-gradient(135deg,#67e8f9,#06b6d4 52%,#0e7490)' },
+        store: { icon: 'fa-solid fa-bag-shopping', bg: 'linear-gradient(135deg,#fda4af,#fb7185 56%,#be123c)' },
+        vpn: { icon: 'fa-solid fa-lock', bg: 'linear-gradient(135deg,#86efac,#22c55e 55%,#15803d)' },
+        backup: { icon: 'fa-solid fa-clock-rotate-left', bg: 'linear-gradient(135deg,#f9a8d4,#ec4899 55%,#be185d)' },
+        settings: { icon: 'fa-solid fa-gear', bg: 'linear-gradient(135deg,#cbd5e1,#64748b 58%,#334155)' },
+        monitoring: { icon: 'fa-solid fa-display', bg: 'linear-gradient(135deg,#93c5fd,#3b82f6 56%,#1d4ed8)' },
+        lxd: { icon: 'fa-brands fa-linux', bg: 'linear-gradient(135deg,#fcd34d,#f97316 56%,#c2410c)' },
+        default: { icon: 'fa-solid fa-circle-nodes', bg: 'linear-gradient(135deg,#94a3b8,#475569 58%,#1f2937)' }
+    };
+
+    const getIconTheme = (app) => {
+        const key = String(app.id || app.name || '').toLowerCase();
+        const name = String(app.name || '').toLowerCase();
+        return iconTheme[key] || iconTheme[name] || iconTheme.default;
+    };
+
     grid.innerHTML = apps.map(app => `
         <div class="app-item glass" draggable="true" data-id="${app.id}" onclick="handleAppClick(event, '${app.url}')">
-            <div class="app-icon" style="background: ${app.color};">
-                ${app.icon.startsWith('/') ? `<img src="${app.icon}" style="width:32px;height:32px;filter:brightness(0) invert(1)">` : `<i class="${app.icon.startsWith('fa') ? app.icon : 'fa-solid fa-' + app.icon}"></i>`}
+            <div class="app-icon" style="background: ${getIconTheme(app).bg};">
+                ${app.icon && app.icon.startsWith('/') ? `<img src="${app.icon}" style="width:68%;height:68%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))">` : `<i class="${getIconTheme(app).icon || (app.icon && app.icon.startsWith('fa') ? app.icon : 'fa-solid fa-' + app.icon)}"></i>`}
             </div>
             <span class="app-name">${app.name}</span>
         </div>
@@ -632,14 +656,50 @@ function renderDashboardApps(apps) {
         item.addEventListener('drop', handleDrop);
         item.addEventListener('dragend', handleDragEnd);
     });
+
+    initMacDock(grid);
 }
 
 function handleAppClick(e, url) {
     if (isDragging) return;
+    const item = e.currentTarget;
+    if (item) {
+        item.classList.remove('dock-bounce');
+        void item.offsetWidth;
+        item.classList.add('dock-bounce');
+        setTimeout(() => item.classList.remove('dock-bounce'), 420);
+    }
     if (url && url !== '#') {
         if (url.startsWith('/')) window.location.href = url;
         else window.open(url, '_blank');
     }
+}
+
+function initMacDock(dock) {
+    const items = Array.from(dock.querySelectorAll('.app-item'));
+    const reset = () => items.forEach(item => item.style.setProperty('--dock-scale', '1'));
+    const maxScale = window.innerWidth < 640 ? 1.35 : 1.82;
+    const effectWidth = window.innerWidth < 640 ? 180 : 300;
+
+    dock.addEventListener('mousemove', (event) => {
+        items.forEach(item => {
+            const rect = item.getBoundingClientRect();
+            const center = rect.left + rect.width / 2;
+            const distance = Math.abs(event.clientX - center);
+            let scale = 1;
+
+            if (distance < effectWidth / 2) {
+                const theta = (distance / (effectWidth / 2)) * Math.PI;
+                const influence = (1 + Math.cos(theta)) / 2;
+                scale = 1 + influence * (maxScale - 1);
+            }
+
+            item.style.setProperty('--dock-scale', scale.toFixed(3));
+        });
+    });
+
+    dock.addEventListener('mouseleave', reset);
+    reset();
 }
 
 let dragSrcEl = null;
