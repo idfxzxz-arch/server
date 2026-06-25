@@ -684,6 +684,10 @@ function handleAppClick(e, url) {
 function initMacDock(dock) {
     const items = Array.from(dock.querySelectorAll('.app-item'));
     const reset = () => items.forEach(item => item.style.setProperty('--dock-scale', '1'));
+    if (window.matchMedia('(max-width: 768px)').matches) {
+        reset();
+        return;
+    }
     const maxScale = window.innerWidth < 640 ? 1.18 : 1.34;
     const effectWidth = window.innerWidth < 640 ? 130 : 220;
 
