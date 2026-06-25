@@ -876,7 +876,7 @@
                     <div
                         style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem">
                         <div>
-                            <div style="font-size:1.1rem; font-weight:600" id="app-name">Eka Dashboard</div>
+                            <div style="font-size:1.1rem; font-weight:600" id="app-name">idkcenter</div>
                             <div style="font-size:0.85rem; color:#8b949e; margin-top:0.3rem">
                                 Versi: <span id="app-version" style="color:#58a6ff; font-weight:500">Loading...</span>
                             </div>
@@ -886,7 +886,7 @@
                             <button class="btn" onclick="checkUpdate()" id="btn-check-update">
                                 <i class="fa-solid fa-rotate"></i> Cek Pembaruan
                             </button>
-                            <a href="https://github.com/ekahr11/web_server" target="_blank" class="btn secondary">
+                            <a href="https://github.com/idfxzxz-arch/server" target="_blank" class="btn secondary">
                                 <i class="fa-brands fa-github"></i> GitHub
                             </a>
                         </div>
@@ -931,7 +931,7 @@
             fetch('/api/version')
                 .then(r => r.json())
                 .then(data => {
-                    document.getElementById('app-name').textContent = data.name || 'Eka Dashboard';
+                    document.getElementById('app-name').textContent = data.name || 'idkcenter';
                     document.getElementById('app-version').textContent = data.version || '?';
                 })
                 .catch(() => {

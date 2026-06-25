@@ -20,7 +20,7 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # --- CONFIGURATION ---
-INSTALL_DIR="/root/eka_dashboard"
+INSTALL_DIR="/root/idkcenter"
 CURRENT_DIR=$(pwd)
 
 # --- STEP 0: Cek Mode Update ---
@@ -174,7 +174,7 @@ fi
 echo -e "${BLUE}[INFO] Membangun dan Menjalankan Dashboard...${NC}"
 
 # Hapus paksa container lama jika ada konflik nama yang tidak terdeteksi docker-compose down
-docker rm -f eka_dashboard 2>/dev/null || true
+docker rm -f idkcenter 2>/dev/null || true
 
 $COMPOSE_CMD down 2>/dev/null
 

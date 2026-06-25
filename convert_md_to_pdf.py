@@ -81,4 +81,4 @@ def convert_md_to_pdf(source_md, output_pdf):
         print(f"Successfully created: {output_pdf}")
 
 if __name__ == "__main__":
-    convert_md_to_pdf("EKA_DASHBOARD_MANUAL.md", "EKA_DASHBOARD_MANUAL.pdf")
+    convert_md_to_pdf("IDKCENTER_MANUAL.md", "IDKCENTER_MANUAL.pdf")

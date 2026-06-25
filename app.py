@@ -39,7 +39,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 # ============ VERSI APLIKASI ============
 APP_VERSION = "1.3"
 APP_NAME = "idkcenter"
-UPDATE_CHECK_URL = "https://raw.githubusercontent.com/ekahr11/web_server/main/version.json"
+UPDATE_CHECK_URL = "https://raw.githubusercontent.com/idfxzxz-arch/server/main/version.json"
 # ========================================
 
 # Data Directory (For Persistence across updates)
@@ -56,7 +56,7 @@ LICENSE_FILE = os.path.join(DATA_DIR, 'license.lic')
 IS_ACTIVATED = False  # Cache validation status
 
 # Update Check URL (Administrator configurable via Code or ENV)
-UPDATE_CHECK_URL = os.environ.get('UPDATE_URL', "https://raw.githubusercontent.com/ekahr11/web_server/main/version.json")
+UPDATE_CHECK_URL = os.environ.get('UPDATE_URL', "https://raw.githubusercontent.com/idfxzxz-arch/server/main/version.json")
 CURRENT_VERSION = "1.1"
 
 def energy_monitor_loop():
@@ -386,7 +386,7 @@ def login_required(f):
             return f(*args, **kwargs)
 
         # 2. Mobile App Bypass (Fix SameSite Cookie Issues)
-        if request.headers.get('X-Mobile-Key') == 'EkaBackupSync_2024_Secret':
+        if request.headers.get('X-Mobile-Key') == 'idkcenterBackupSync_2024_Secret':
             return f(*args, **kwargs)
             
         # 2. Check Session
@@ -2430,19 +2430,19 @@ def perform_update():
         # Cari container dashboard ini
         container = None
         for c in client.containers.list():
-            if 'eka_dashboard' in c.name:
+            if c.name == 'idkcenter':
                 container = c
                 break
                 
         if not container:
             # Fallback jika tidak ketemu berdasarkan nama
-            container = client.containers.get('eka_dashboard')
+            container = client.containers.get('idkcenter')
 
         working_dir = container.labels.get('com.docker.compose.project.working_dir')
         
         if not working_dir:
             # Fallback manual jika gagal dideteksi
-            working_dir = '/root/eka_dashboard'
+            working_dir = '/root/idkcenter'
 
         # Eksekusi perintah di host untuk pull kode terbaru dan build ulang
         # Perintah ini akan berjalan di background dan otomatis me-restart container
@@ -3802,8 +3802,8 @@ def get_installed_apps():
              
         for app in full_catalog:
             app_id = app['id']
-            # Check eka_ prefixed first (standard), then raw id (custom legacy?)
-            container_name = f"eka_{app_id}"
+            # Check idkcenter_ prefixed first (standard), then raw id (custom legacy?)
+            container_name = f"idkcenter_{app_id}"
             info = container_map.get(container_name) or container_map.get(app_id)
             
             if info:
@@ -4200,10 +4200,10 @@ def manage_app_endpoint():
         client = docker.from_env()
         
         # Determine container name
-        # Try finding by name "eka_{id}" or just id if custom
+        # Try finding by name "idkcenter_{id}" or just id if custom
         container = None
         try:
-             container = client.containers.get(f"eka_{app_id}")
+             container = client.containers.get(f"idkcenter_{app_id}")
         except:
              try:
                  container = client.containers.get(app_id) # maybe custom name
@@ -4213,7 +4213,7 @@ def manage_app_endpoint():
         # If still not found, try searching by image or loosely?
         if not container:
              # Try catalog lookup to be sure of container name?
-             # For now assume 'eka_{app_id}' is standard
+             # For now assume 'idkcenter_{app_id}' is standard
              return jsonify({'error': 'Container not found'}), 404
              
         if action == 'start':
@@ -4467,7 +4467,7 @@ def install_app():
             
             image = app_default['image']
 
-        container_name = f"eka_{app_id}"
+        container_name = f"idkcenter_{app_id}"
         
         # 1. Pull Image
         pull_cmd = ['docker', 'pull', image]
@@ -4571,7 +4571,7 @@ def manage_app():
         if not app_id or not action:
             return jsonify({'error': 'Invalid request'}), 400
             
-        container_name = f"eka_{app_id}"
+        container_name = f"idkcenter_{app_id}"
         
         if action == 'uninstall':
             subprocess.run(['docker', 'rm', '-f', container_name], capture_output=True)

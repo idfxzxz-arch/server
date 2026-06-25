@@ -18,15 +18,15 @@ Aplikasi ini dijalankan menggunakan **Docker Compose** dan dikonfigurasi untuk b
 
 **Bagi Pengguna Baru (Install Baru):**
 ```bash
-git clone https://github.com/USERNAME/eka_dashboard.git
-cd eka_dashboard
+git clone https://github.com/USERNAME/idkcenter.git
+cd idkcenter
 docker compose up --build -d
 ```
 
 **Bagi Pengguna Lama (Cara Update):**
 Untuk mendapatkan fitur terbaru seperti *LXD Manager*, kamu **wajib** melakukan pull dan build ulang agar container memperbarui API backend-nya.
 ```bash
-cd eka_dashboard
+cd idkcenter
 git pull origin main
 docker compose down
 docker compose up --build -d
@@ -35,13 +35,13 @@ docker compose up --build -d
 ---
 
 ## Hak Kepemilikan (Copyright & Ownership)
-© 2026 **Eka Harefa**. Hak cipta dilindungi undang-undang.
+© 2026 **idkcenter**. Hak cipta dilindungi undang-undang.
 
-Seluruh baris kode (source code), desain antarmuka, aset, dan logika sistem di dalam repositori ini adalah milik eksklusif dari **Eka Harefa**. 
+Seluruh baris kode (source code), desain antarmuka, aset, dan logika sistem di dalam repositori ini adalah milik eksklusif dari **idkcenter**. 
 
 **DILARANG KERAS:**
 1. Menyalin, menduplikasi, atau mencuri kode dari proyek ini (Code Theft).
 2. Memodifikasi dan mendistribusikan ulang (re-distribute) atas nama pihak lain.
-3. Menggunakan proyek ini untuk kepentingan komersial pribadi tanpa izin resmi dan tertulis dari pihak Eka Harefa.
+3. Menggunakan proyek ini untuk kepentingan komersial pribadi tanpa izin resmi dan tertulis dari pihak idkcenter.
 
 Tindakan penyalahgunaan, pembajakan, atau penggunaan tanpa izin akan ditindak secara tegas sesuai dengan hukum perlindungan Hak Cipta yang berlaku.

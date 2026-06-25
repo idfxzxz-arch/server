@@ -24,20 +24,20 @@ Jika server Anda sudah terpasang `git`, Anda dapat langsung mengkloning reposito
 sudo apt-get update && sudo apt-get install -y git
 
 # 2. Clone repositori idkcenter
-git clone https://github.com/ekahr11/web_server.git eka_dashboard
+git clone https://github.com/idfxzxz-arch/server.git idkcenter
 
 # 3. Masuk ke direktori
-cd eka_dashboard
+cd idkcenter
 
 # 4. Eksekusi Script Instalasi
 sudo bash install.sh
 ```
 
 ### Pilihan B: Instalasi via File ZIP
-Jika Anda memiliki file `.zip` (misalnya `eka_dashboard_retail.zip`):
+Jika Anda memiliki file `.zip` (misalnya `idkcenter_retail.zip`):
 1. **Upload** file `.zip` tersebut ke server Anda (menggunakan SCP, WinSCP, atau FTP).
    ```bash
-   scp eka_dashboard_retail.zip root@IP_SERVER_ANDA:/root/
+   scp idkcenter_retail.zip root@IP_SERVER_ANDA:/root/
    ```
 2. **Ekstrak dan Install** melalui SSH:
    ```bash
@@ -45,10 +45,10 @@ Jika Anda memiliki file `.zip` (misalnya `eka_dashboard_retail.zip`):
    sudo apt-get update && sudo apt-get install -y unzip
    
    # Ekstrak file
-   unzip eka_dashboard_retail.zip -d eka_dashboard
+   unzip idkcenter_retail.zip -d idkcenter
    
    # Masuk ke folder & Install
-   cd eka_dashboard
+   cd idkcenter
    sudo bash install.sh
    ```
 
@@ -82,7 +82,7 @@ Berikut adalah 15 daftar kendala yang sering terjadi beserta solusinya:
 Tidak. Script installer otomatis mendeteksi CasaOS dan akan memindahkan port CasaOS dari `80` menjadi `9999`. Anda dapat mengakses CasaOS kembali di `http://IP-SERVER:9999`, sementara idkcenter menggunakan port `80`.
 
 **2. Bagaimana cara mengganti Port idkcenter agar tidak menggunakan Port 80?**
-1. Masuk ke direktori instalasi: `cd /root/eka_dashboard`
+1. Masuk ke direktori instalasi: `cd /root/idkcenter`
 2. Buka file konfigurasi: `nano docker-compose.yml`
 3. Ubah bagian `ports:` dari `- "80:5000"` menjadi `- "8080:5000"` (atau port lain).
 4. Simpan perubahan (Ctrl+X, ketik Y, lalu Enter).
@@ -92,7 +92,7 @@ Tidak. Script installer otomatis mendeteksi CasaOS dan akan memindahkan port Cas
 **3. Saya lupa Password Admin, bagaimana cara me-resetnya?**
 Hapus file konfigurasi keamanan lalu *restart container*:
 ```bash
-cd /root/eka_dashboard
+cd /root/idkcenter
 sudo rm data/security_config.json
 sudo docker compose restart
 ```
@@ -120,7 +120,7 @@ Masalah ini umumnya disebabkan oleh *cache* browser yang nyangkut. Tekan tombol 
 Artinya *container* web server sudah berjalan, namun aplikasi di dalamnya masih proses *booting* atau mengalami *crash*. Tunggu sekitar 10-15 detik dan *refresh* halaman. Jika masih error, cek log sistem.
 
 **11. Bagaimana cara melihat pesan error lengkap (Log Sistem)?**
-Masuk ke direktori instalasi (`cd /root/eka_dashboard`) dan ketik `sudo docker compose logs -f`. Di situ Anda bisa melihat aktivitas sistem atau peringatan error secara *real-time*. Tekan Ctrl+C untuk keluar.
+Masuk ke direktori instalasi (`cd /root/idkcenter`) dan ketik `sudo docker compose logs -f`. Di situ Anda bisa melihat aktivitas sistem atau peringatan error secara *real-time*. Tekan Ctrl+C untuk keluar.
 
 **12. Bagaimana cara mematikan sementara (stop) idkcenter?**
 Masuk ke direktori instalasi, lalu eksekusi perintah `sudo docker compose down`. Untuk menyalakannya kembali, jalankan `sudo docker compose up -d`.
