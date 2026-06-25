@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - idkcenter</title>
+    <script>
+        (function () {
+            const saved = localStorage.getItem('idkcenter-theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.dataset.theme = saved || (prefersDark ? 'dark' : 'light');
+        })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            color-scheme: light;
+            --page-start: #f8fafc;
+            --page-end: #eef4fb;
+            --page-accent: rgba(37, 99, 235, 0.06);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --border: #e2e8f0;
+            --field-bg: #f8fafc;
+            --field-border: #cbd5e1;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --text-soft: #334155;
+            --brand-bg: #111827;
+            --brand-text: #ffffff;
+            --accent: #2563eb;
+            --accent-strong: #1d4ed8;
+            --shadow: 0 18px 50px rgba(15, 23, 42, 0.1);
+        }
+
+        html[data-theme="dark"] {
+            color-scheme: dark;
+            --page-start: #0b1018;
+            --page-end: #111827;
+            --page-accent: rgba(96, 165, 250, 0.1);
+            --card-bg: rgba(17, 24, 39, 0.9);
+            --border: #263244;
+            --field-bg: #0b1220;
+            --field-border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-soft: #cbd5e1;
+            --brand-bg: #60a5fa;
+            --brand-text: #0b1220;
+            --accent: #60a5fa;
+            --accent-strong: #3b82f6;
+            --shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background:
+                linear-gradient(90deg, var(--page-accent), transparent 32%),
+                linear-gradient(180deg, var(--page-start) 0%, var(--page-end) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+            padding: 1rem;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            backdrop-filter: blur(18px);
+            box-shadow: var(--shadow);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .brand-mark {
+            width: 52px;
+            height: 52px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 1.25rem;
+            background: var(--brand-bg);
+            color: var(--brand-text);
+            font-weight: 800;
+            box-shadow: 0 12px 24px rgba(20, 184, 166, 0.22);
+        }
+
+        .login-header h1 {
+            font-size: 1.65rem;
+            font-weight: 750;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-soft);
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            background: var(--field-bg);
+            border: 1px solid var(--field-border);
+            color: var(--text-main);
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+        }
+
+        .btn {
+            width: 100%;
+            background: var(--accent);
+            border: none;
+            color: #ffffff;
+            padding: 0.9rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.22);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-msg {
+            background: rgba(251, 113, 133, 0.12);
+            border: 1px solid rgba(251, 113, 133, 0.5);
+            color: #fda4af;
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        .error-msg.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-card">
+        <div class="login-header">
+            <div class="brand-mark">idk</div>
+            <h1>idkcenter</h1>
+            <p>Masuk untuk mengelola pusat server Anda.</p>
+        </div>
+
+        <div class="error-msg" id="error-msg"></div>
+
+        <form id="login-form" onsubmit="doLogin(event)">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username" required autocomplete="username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password" required autocomplete="current-password">
+            </div>
+            <button type="submit" class="btn" id="login-btn">
+                <i class="fa-solid fa-right-to-bracket"></i> Masuk
+            </button>
+        </form>
+    </div>
+
+    <script>
+        function doLogin(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('login-btn');
+            const errorMsg = document.getElementById('error-msg');
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Memproses...';
+            errorMsg.classList.remove('show');
+
+            fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value
+                })
+            })
+                .then(r => r.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '/dashboard';
+                    } else {
+                        errorMsg.textContent = data.error || 'Login gagal';
+                        errorMsg.classList.add('show');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Masuk';
+                    }
+                })
+                .catch(err => {
+                    errorMsg.textContent = 'Koneksi bermasalah';
+                    errorMsg.classList.add('show');
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Masuk';
+                });
+        }
+    </script>
+</body>
+
+</html>
