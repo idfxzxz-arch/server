@@ -4,71 +4,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Files - Server Dashboard</title>
+    <title>Files - idkcenter</title>
+    <script>
+        (function () {
+            const saved = localStorage.getItem('idkcenter-theme');
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.dataset.theme = saved || (prefersDark ? 'dark' : 'light');
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=5">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}?v=15">
     <style>
-        /* File Manager Specific Styles */
-        .fm-container {
-            display: flex;
-            height: calc(100vh - 120px);
-            gap: 0;
+        :root {
+            --fm-window: rgba(255, 255, 255, 0.82);
+            --fm-sidebar: rgba(242, 246, 251, 0.78);
+            --fm-line: rgba(148, 163, 184, 0.28);
+            --fm-hover: rgba(37, 99, 235, 0.08);
+            --fm-selected: rgba(37, 99, 235, 0.16);
+            --fm-folder: #0a84ff;
+            --fm-file: #64748b;
         }
 
-        /* Sidebar */
+        html[data-theme="dark"] {
+            --fm-window: rgba(17, 24, 39, 0.86);
+            --fm-sidebar: rgba(15, 23, 42, 0.7);
+            --fm-line: rgba(71, 85, 105, 0.5);
+            --fm-hover: rgba(96, 165, 250, 0.12);
+            --fm-selected: rgba(96, 165, 250, 0.22);
+            --fm-folder: #60a5fa;
+            --fm-file: #94a3b8;
+        }
+
+        body {
+            user-select: none;
+        }
+
+        .fm-page {
+            padding: 1rem clamp(0.75rem, 2vw, 1.5rem);
+            max-width: none;
+        }
+
+        .fm-topbar {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .traffic-lights {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0 0.35rem;
+        }
+
+        .traffic-lights span {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            display: block;
+        }
+
+        .tl-red { background: #ff5f57; }
+        .tl-yellow { background: #ffbd2e; }
+        .tl-green { background: #28c840; }
+
+        .fm-titleblock h2 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 750;
+            color: var(--text-main);
+        }
+
+        .fm-titleblock span {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+        }
+
+        .fm-top-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 0.45rem;
+            align-items: center;
+        }
+
+        .fm-container {
+            display: flex;
+            height: calc(100vh - 96px);
+            overflow: hidden;
+            background: var(--fm-window);
+            border: 1px solid var(--fm-line);
+            border-radius: 14px;
+            box-shadow: 0 24px 80px rgba(15, 23, 42, 0.14);
+            backdrop-filter: blur(22px);
+        }
+
         .fm-sidebar {
-            width: 240px;
-            background: rgba(0, 0, 0, 0.3);
-            border-right: 1px solid var(--glass-border);
+            width: 248px;
+            background: var(--fm-sidebar);
+            border-right: 1px solid var(--fm-line);
             overflow-y: auto;
             flex-shrink: 0;
-            padding: 0.5rem;
+            padding: 0.75rem;
+            transition: width 0.2s ease, padding 0.2s ease;
         }
 
         .fm-sidebar.collapsed {
             width: 0;
             padding: 0;
             overflow: hidden;
+            border-right: 0;
         }
 
         .tree-item {
             display: flex;
             align-items: center;
-            padding: 0.4rem 0.6rem;
+            min-height: 34px;
+            padding: 0.42rem 0.6rem;
             cursor: pointer;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            gap: 0.5rem;
-            color: #ccc;
+            border-radius: 8px;
+            font-size: 0.86rem;
+            gap: 0.55rem;
+            color: var(--text-soft);
+            margin-bottom: 0.12rem;
         }
 
         .tree-item:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--fm-hover);
         }
 
         .tree-item.active {
-            background: rgba(255, 255, 255, 0.15);
-            color: #fff;
+            background: var(--fm-selected);
+            color: var(--text-main);
+            font-weight: 650;
         }
 
         .tree-item i {
-            color: #FF9966;
-            width: 16px;
+            color: var(--fm-folder);
+            width: 18px;
+            text-align: center;
         }
 
-        .tree-children {
-            padding-left: 1rem;
-            display: none;
-        }
-
-        .tree-children.open {
-            display: block;
-        }
-
-        /* Main Content */
         .fm-main {
             flex: 1;
             display: flex;
@@ -77,77 +156,113 @@
             min-width: 0;
         }
 
-        /* Header / Toolbar */
         .fm-header {
-            padding: 0.8rem 1rem;
-            display: flex;
+            padding: 0.65rem 0.75rem;
+            display: grid;
+            grid-template-columns: auto 1fr auto;
             align-items: center;
-            gap: 0.8rem;
-            border-bottom: 1px solid var(--glass-border);
-            flex-wrap: wrap;
+            gap: 0.65rem;
+            border-bottom: 1px solid var(--fm-line);
         }
 
-        /* Breadcrumbs */
+        .fm-nav {
+            display: flex;
+            gap: 0.35rem;
+        }
+
+        .fm-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
         .fm-breadcrumbs {
             display: flex;
             align-items: center;
-            gap: 0.3rem;
-            font-size: 0.9rem;
-            flex-wrap: wrap;
-            flex: 1;
+            gap: 0.25rem;
+            font-size: 0.86rem;
+            overflow: hidden;
+            min-width: 0;
         }
 
         .fm-crumb {
             color: var(--text-muted);
             cursor: pointer;
-            padding: 0.2rem 0.4rem;
-            border-radius: 4px;
+            padding: 0.32rem 0.48rem;
+            border-radius: 7px;
+            white-space: nowrap;
+            max-width: 180px;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .fm-crumb:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
+            background: var(--fm-hover);
+            color: var(--text-main);
         }
 
         .fm-crumb.active {
-            color: #fff;
-            font-weight: 500;
+            color: var(--text-main);
+            font-weight: 650;
             cursor: default;
         }
 
         .fm-crumb-sep {
-            color: #555;
-            font-size: 0.8rem;
+            color: var(--text-muted);
+            font-size: 0.72rem;
         }
 
-        /* Table */
+        .fm-search {
+            width: min(220px, 26vw);
+            background: var(--status-bg);
+            border: 1px solid var(--fm-line);
+            color: var(--text-main);
+            padding: 0.48rem 0.7rem;
+            border-radius: 999px;
+            font-size: 0.84rem;
+            outline: none;
+        }
+
+        .fm-search:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
         .fm-table-wrap {
             flex: 1;
             overflow-y: auto;
-            padding: 0;
+            padding: 0.35rem;
+            position: relative;
         }
 
         .fm-table {
             width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.86rem;
         }
 
         .fm-table th,
         .fm-table td {
-            padding: 0.5rem 0.8rem;
+            padding: 0.64rem 0.78rem;
             text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--fm-line);
+            color: var(--text-soft);
         }
 
         .fm-table th {
             position: sticky;
-            top: 0;
-            background: #1e1e28;
-            font-weight: 500;
+            top: -0.35rem;
+            background: color-mix(in srgb, var(--surface) 86%, transparent);
+            backdrop-filter: blur(16px);
+            font-weight: 700;
             color: var(--text-muted);
-            font-size: 0.8rem;
+            font-size: 0.72rem;
             text-transform: uppercase;
+            letter-spacing: 0.06em;
+            z-index: 1;
         }
 
         .fm-table tr {
@@ -155,75 +270,120 @@
         }
 
         .fm-table tr:hover {
-            background: rgba(255, 255, 255, 0.03);
+            background: var(--fm-hover);
         }
 
         .fm-table tr.selected {
-            background: rgba(100, 150, 255, 0.15);
+            background: var(--fm-selected);
         }
 
         .fm-icon {
-            width: 20px;
+            width: 24px;
             text-align: center;
-            margin-right: 0.5rem;
+            margin-right: 0.55rem;
+            font-size: 1rem;
         }
 
-        .fm-icon.dir {
-            color: #FF9966;
-        }
+        .fm-icon.dir { color: var(--fm-folder); }
+        .fm-icon.file { color: var(--fm-file); }
 
-        .fm-icon.file {
-            color: #888;
-        }
-
-        /* Compact Mode */
         body.compact .fm-table td,
         body.compact .fm-table th {
-            padding: 0.3rem 0.6rem;
+            padding: 0.42rem 0.6rem;
             font-size: 0.8rem;
         }
 
-        body.compact .tree-item {
-            padding: 0.3rem 0.5rem;
-            font-size: 0.8rem;
+        body.grid-view .fm-table,
+        body.grid-view .fm-table thead,
+        body.grid-view .fm-table tbody {
+            display: block;
         }
 
-        /* Detail Panel */
+        body.grid-view .fm-table thead {
+            display: none;
+        }
+
+        body.grid-view #file-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+            gap: 0.55rem;
+            padding: 0.35rem;
+        }
+
+        body.grid-view .fm-table tr {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 126px;
+            border: 1px solid transparent;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        body.grid-view .fm-table tr:hover {
+            border-color: var(--fm-line);
+        }
+
+        body.grid-view .fm-table td {
+            display: none;
+            border: 0;
+            padding: 0;
+        }
+
+        body.grid-view .fm-table td:first-child {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            color: var(--text-main);
+            padding: 0.75rem;
+            overflow-wrap: anywhere;
+        }
+
+        body.grid-view .fm-icon {
+            margin-right: 0;
+            width: 46px;
+            height: 46px;
+            display: grid;
+            place-items: center;
+            font-size: 2rem;
+        }
+
         .fm-detail {
-            width: 280px;
-            background: rgba(0, 0, 0, 0.3);
-            border-left: 1px solid var(--glass-border);
+            width: 292px;
+            background: var(--fm-sidebar);
+            border-left: 1px solid var(--fm-line);
             padding: 1rem;
             overflow-y: auto;
             flex-shrink: 0;
         }
 
-        .fm-detail.hidden {
-            display: none;
-        }
+        .fm-detail.hidden { display: none; }
 
         .fm-detail h4 {
             margin: 0 0 1rem;
-            font-weight: 500;
-            word-break: break-all;
+            font-weight: 750;
+            word-break: break-word;
+            color: var(--text-main);
         }
 
         .fm-detail-row {
             display: flex;
             justify-content: space-between;
-            padding: 0.4rem 0;
-            font-size: 0.85rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            gap: 1rem;
+            padding: 0.55rem 0;
+            font-size: 0.84rem;
+            border-bottom: 1px solid var(--fm-line);
         }
 
-        .fm-detail-row span:first-child {
-            color: var(--text-muted);
-        }
+        .fm-detail-row span:first-child { color: var(--text-muted); }
 
         .fm-detail-row span:last-child {
-            color: #fff;
+            color: var(--text-main);
             text-align: right;
-            max-width: 150px;
+            max-width: 158px;
             word-break: break-all;
         }
 
@@ -231,79 +391,157 @@
             margin-top: 1rem;
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 0.45rem;
         }
 
-        /* Context Menu */
         .context-menu {
             position: fixed;
-            background: #2a2a35;
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            padding: 0.5rem 0;
-            min-width: 160px;
+            background: var(--surface);
+            border: 1px solid var(--fm-line);
+            border-radius: 10px;
+            padding: 0.35rem;
+            min-width: 190px;
             z-index: 300;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 18px 50px rgba(15, 23, 42, 0.22);
         }
 
-        .context-menu.hidden {
-            display: none;
-        }
+        .context-menu.hidden { display: none; }
 
         .ctx-item {
-            padding: 0.5rem 1rem;
+            padding: 0.55rem 0.7rem;
             cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 0.8rem;
-            font-size: 0.9rem;
+            gap: 0.75rem;
+            border-radius: 7px;
+            font-size: 0.88rem;
+            color: var(--text-main);
         }
 
-        .ctx-item:hover {
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .ctx-item.danger {
-            color: #ff6b6b;
-        }
+        .ctx-item:hover { background: var(--fm-hover); }
+        .ctx-item.danger { color: var(--danger-text); }
 
         .ctx-sep {
             height: 1px;
-            background: rgba(255, 255, 255, 0.1);
-            margin: 0.3rem 0;
+            background: var(--fm-line);
+            margin: 0.35rem;
         }
 
-        /* Toolbar Buttons */
         .fm-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
+            background: var(--status-bg);
+            border: 1px solid var(--fm-line);
+            color: var(--text-soft);
+            padding: 0.48rem 0.68rem;
+            min-height: 34px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.84rem;
             display: inline-flex;
             align-items: center;
-            gap: 0.4rem;
+            gap: 0.42rem;
+            white-space: nowrap;
         }
 
         .fm-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
+            background: var(--hover-bg);
+            border-color: var(--hover-border);
+            color: var(--text-main);
         }
 
         .fm-btn.active {
-            background: rgba(100, 150, 255, 0.2);
-            border-color: rgba(100, 150, 255, 0.3);
+            background: var(--fm-selected);
+            border-color: var(--accent);
+            color: var(--text-main);
         }
 
-        /* Status Bar */
+        .fm-btn.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
         .fm-status {
-            padding: 0.4rem 1rem;
-            font-size: 0.8rem;
+            padding: 0.48rem 0.85rem;
+            font-size: 0.78rem;
             color: var(--text-muted);
-            border-top: 1px solid var(--glass-border);
+            border-top: 1px solid var(--fm-line);
             display: flex;
             justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .drop-hint {
+            position: absolute;
+            inset: 0.75rem;
+            display: none;
+            place-items: center;
+            border: 2px dashed var(--accent);
+            border-radius: 14px;
+            background: color-mix(in srgb, var(--surface) 80%, transparent);
+            color: var(--text-main);
+            font-weight: 750;
+            z-index: 4;
+        }
+
+        .fm-table-wrap.drag-over .drop-hint {
+            display: grid;
+        }
+
+        .fm-toast {
+            position: fixed;
+            right: 1rem;
+            bottom: 1rem;
+            background: var(--surface);
+            border: 1px solid var(--fm-line);
+            color: var(--text-main);
+            padding: 0.75rem 0.9rem;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            z-index: 500;
+            display: none;
+            max-width: min(360px, calc(100vw - 2rem));
+        }
+
+        .fm-toast.show {
+            display: block;
+        }
+
+        .editor-modal {
+            background: var(--surface);
+            color: var(--text-main);
+        }
+
+        @media (max-width: 980px) {
+            .fm-header {
+                grid-template-columns: 1fr;
+            }
+
+            .fm-toolbar,
+            .fm-nav {
+                justify-content: flex-start;
+            }
+
+            .fm-search {
+                width: 100%;
+            }
+
+            .fm-detail {
+                display: none;
+            }
+        }
+
+        @media (max-width: 720px) {
+            .fm-sidebar {
+                display: none;
+            }
+
+            .fm-topbar {
+                flex-wrap: wrap;
+            }
+
+            .fm-container {
+                height: calc(100vh - 128px);
+            }
         }
     </style>
 </head>
@@ -311,16 +549,28 @@
 <body>
     <div class="wallpaper"></div>
 
-    <div class="app-container" style="padding: 0.5rem 1rem; max-width: none;">
+    <div class="app-container fm-page">
         <!-- Top Header -->
-        <header style="display:flex; align-items:center; gap:1rem; padding:0.5rem 0; margin-bottom:0.5rem">
-            <button class="fm-btn" onclick="window.location.href='/dashboard'"><i class="fa-solid fa-home"></i></button>
-            <h2 style="margin:0; font-weight:400; font-size:1.1rem">File Manager</h2>
-            <div style="margin-left:auto; display:flex; gap:0.5rem">
-                <button class="fm-btn" id="btn-compact" onclick="toggleCompact()"><i class="fa-solid fa-compress"></i>
-                    Compact</button>
-                <button class="fm-btn" id="btn-sidebar" onclick="toggleSidebar()"><i
-                        class="fa-solid fa-bars"></i></button>
+        <header class="fm-topbar">
+            <div class="traffic-lights" aria-hidden="true">
+                <span class="tl-red"></span>
+                <span class="tl-yellow"></span>
+                <span class="tl-green"></span>
+            </div>
+            <button class="fm-btn" onclick="window.location.href='/dashboard'" title="Dashboard">
+                <i class="fa-solid fa-house"></i>
+            </button>
+            <div class="fm-titleblock">
+                <h2>Files</h2>
+                <span>idkcenter file manager</span>
+            </div>
+            <div class="fm-top-actions">
+                <button class="fm-btn" id="btn-compact" onclick="toggleCompact()" title="Compact">
+                    <i class="fa-solid fa-compress"></i>
+                </button>
+                <button class="fm-btn" id="btn-sidebar" onclick="toggleSidebar()" title="Sidebar">
+                    <i class="fa-solid fa-sidebar"></i>
+                </button>
             </div>
         </header>
 
@@ -338,30 +588,31 @@
             <div class="fm-main">
                 <!-- Toolbar / Breadcrumbs -->
                 <div class="fm-header">
-                    <div class="fm-breadcrumbs" id="breadcrumbs"></div>
-                    <div style="display:flex; align-items:center; gap:0.5rem">
-                        <input type="text" id="search-input" placeholder="Search files..." style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.1); 
-                            color:#fff; padding:0.4rem 0.8rem; border-radius:6px; font-size:0.85rem; width:180px"
-                            onkeyup="filterFiles(this.value)">
-                        <button class="fm-btn" onclick="clearSearch()"><i class="fa-solid fa-xmark"></i></button>
+                    <div class="fm-nav">
+                        <button class="fm-btn" onclick="goBack()" title="Back"><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="fm-btn" onclick="goForward()" title="Forward"><i class="fa-solid fa-chevron-right"></i></button>
+                        <button class="fm-btn" onclick="loadFiles(currentPath)" title="Refresh"><i class="fa-solid fa-rotate-right"></i></button>
                     </div>
-                    <button class="fm-btn" onclick="createNew('folder')"><i
-                            class="fa-solid fa-folder-plus"></i></button>
-                    <button class="fm-btn" onclick="createNew('file')"><i class="fa-solid fa-file-plus"></i></button>
-                    <button class="fm-btn" onclick="loadFiles(currentPath)"><i
-                            class="fa-solid fa-rotate-right"></i></button>
-                    <input type="file" id="upload-input" multiple style="display:none"
-                        onchange="uploadFiles(this.files)">
-                    <button class="fm-btn" onclick="document.getElementById('upload-input').click()"
-                        style="background:#238636">
-                        <i class="fa-solid fa-upload"></i> Upload
-                    </button>
-                    <button class="fm-btn" onclick="downloadSelected()"><i class="fa-solid fa-download"></i></button>
-
+                    <div class="fm-breadcrumbs" id="breadcrumbs"></div>
+                    <div class="fm-toolbar">
+                        <input class="fm-search" type="text" id="search-input" placeholder="Search" onkeyup="filterFiles(this.value)">
+                        <button class="fm-btn" onclick="clearSearch()" title="Clear search"><i class="fa-solid fa-xmark"></i></button>
+                        <button class="fm-btn" id="btn-list" onclick="setViewMode('list')" title="List view"><i class="fa-solid fa-list"></i></button>
+                        <button class="fm-btn" id="btn-grid" onclick="setViewMode('grid')" title="Grid view"><i class="fa-solid fa-table-cells-large"></i></button>
+                        <button class="fm-btn" onclick="createNew('folder')" title="New folder"><i class="fa-solid fa-folder-plus"></i></button>
+                        <button class="fm-btn" onclick="createNew('file')" title="New file"><i class="fa-solid fa-file-circle-plus"></i></button>
+                        <input type="file" id="upload-input" multiple style="display:none" onchange="uploadFiles(this.files)">
+                        <button class="fm-btn primary" onclick="document.getElementById('upload-input').click()">
+                            <i class="fa-solid fa-upload"></i> Upload
+                        </button>
+                        <button class="fm-btn" onclick="downloadSelected()" title="Download"><i class="fa-solid fa-download"></i></button>
+                        <button class="fm-btn" onclick="copyCurrentPath()" title="Copy path"><i class="fa-solid fa-link"></i></button>
+                    </div>
                 </div>
 
                 <!-- File Table -->
-                <div class="fm-table-wrap">
+                <div class="fm-table-wrap" id="drop-zone">
+                    <div class="drop-hint"><i class="fa-solid fa-cloud-arrow-up"></i>&nbsp; Drop files to upload</div>
                     <table class="fm-table">
                         <thead>
                             <tr>
@@ -398,7 +649,7 @@
                         <button class="fm-btn" onclick="openSelected()"><i class="fa-solid fa-folder-open"></i>
                             Open</button>
                         <button class="fm-btn" onclick="renameItem()"><i class="fa-solid fa-pen"></i> Rename</button>
-                        <button class="fm-btn" style="color:#ff6b6b" onclick="deleteItem()"><i
+                        <button class="fm-btn" style="color:var(--danger-text)" onclick="deleteItem()"><i
                                 class="fa-solid fa-trash"></i> Delete</button>
                     </div>
                 </div>
@@ -428,7 +679,7 @@
                 <h3 id="editor-filename">filename.txt</h3>
                 <div style="display:flex; gap:1rem">
                     <button class="fm-btn" onclick="saveFile()"><i class="fa-solid fa-save"></i> Save</button>
-                    <button class="fm-btn" style="color:#ff6b6b" onclick="closeEditor()"><i
+                    <button class="fm-btn" style="color:var(--danger-text)" onclick="closeEditor()"><i
                             class="fa-solid fa-xmark"></i>
                         Close</button>
                 </div>
@@ -438,7 +689,9 @@
             </div>
         </div>
 
-        <script src="{{ url_for('static', filename='files.js') }}?v=2"></script>
+        <div class="fm-toast" id="fm-toast"></div>
+
+        <script src="{{ url_for('static', filename='files.js') }}?v=3"></script>
 </body>
 
 </html>

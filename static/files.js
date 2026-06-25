@@ -5,11 +5,16 @@ let currentPage = 1;
 let hasMore = false;
 let isLoading = false;
 let viewMode = 'drives'; // 'files' or 'drives'
+let displayMode = localStorage.getItem('idkcenter-files-view') || 'list';
+let pathHistory = [];
+let historyIndex = -1;
 
 // Quick folder list for sidebar
 const quickFolders = ['/', '/root', '/home', '/var', '/etc', '/tmp', '/opt'];
 
 document.addEventListener('DOMContentLoaded', () => {
+    setViewMode(displayMode, false);
+
     const urlParams = new URLSearchParams(window.location.search);
     const initialPath = urlParams.get('path');
     
@@ -19,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadDrives();
     }
     buildSidebarTree();
+    setupDragDropUpload();
 
     // Close context menu on click outside
     document.addEventListener('click', (e) => {
@@ -37,9 +43,63 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function loadDrives() {
+function showToast(message, type = 'info') {
+    const toast = document.getElementById('fm-toast');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.dataset.type = type;
+    toast.classList.add('show');
+    clearTimeout(showToast.timer);
+    showToast.timer = setTimeout(() => toast.classList.remove('show'), 2600);
+}
+
+function pushHistory(path) {
+    if (historyIndex >= 0 && pathHistory[historyIndex] === path) return;
+    pathHistory = pathHistory.slice(0, historyIndex + 1);
+    pathHistory.push(path);
+    historyIndex = pathHistory.length - 1;
+}
+
+function goBack() {
+    if (historyIndex <= 0) return;
+    historyIndex -= 1;
+    openPathFromHistory(pathHistory[historyIndex]);
+}
+
+function goForward() {
+    if (historyIndex >= pathHistory.length - 1) return;
+    historyIndex += 1;
+    openPathFromHistory(pathHistory[historyIndex]);
+}
+
+function openPathFromHistory(path) {
+    if (path === 'drives://') loadDrives(false);
+    else loadFiles(path, 1, false);
+}
+
+function setViewMode(mode, persist = true) {
+    displayMode = mode === 'grid' ? 'grid' : 'list';
+    document.body.classList.toggle('grid-view', displayMode === 'grid');
+    const listBtn = document.getElementById('btn-list');
+    const gridBtn = document.getElementById('btn-grid');
+    if (listBtn) listBtn.classList.toggle('active', displayMode === 'list');
+    if (gridBtn) gridBtn.classList.toggle('active', displayMode === 'grid');
+    if (persist) localStorage.setItem('idkcenter-files-view', displayMode);
+}
+
+function copyCurrentPath() {
+    const path = currentPath === 'drives://' ? 'This PC' : currentPath;
+    navigator.clipboard?.writeText(path).then(() => {
+        showToast('Path copied');
+    }).catch(() => {
+        prompt('Copy path:', path);
+    });
+}
+
+function loadDrives(addHistory = true) {
     viewMode = 'drives';
     currentPath = 'drives://';
+    if (addHistory) pushHistory(currentPath);
     
     document.getElementById('file-list').innerHTML = '';
     document.getElementById('status-text').textContent = 'Loading drives...';
@@ -52,7 +112,7 @@ function loadDrives() {
         .then(r => r.json())
         .then(data => {
             if (data.error) {
-                alert("Error loading drives: " + data.error);
+                showToast("Error loading drives: " + data.error, 'error');
                 return;
             }
             renderDriveTable(data.drives);
@@ -78,9 +138,9 @@ function renderDriveTable(drives) {
         const percent = drive.percent || 0;
         
         // Progress bar style for disk usage
-        let barColor = '#238636'; // Green
-        if (percent > 70) barColor = '#d29922'; // Yellow
-        if (percent > 90) barColor = '#f85149'; // Red
+        let barColor = '#22c55e';
+        if (percent > 70) barColor = '#f59e0b';
+        if (percent > 90) barColor = '#ef4444';
 
         tr.innerHTML = `
             <td>
@@ -88,7 +148,7 @@ function renderDriveTable(drives) {
                     <span class="fm-icon dir" style="font-size:1.2rem"><i class="fa-solid fa-hard-drive"></i></span>
                     <div>
                         <div style="font-weight:500">${drive.mountpoint}</div>
-                        <div style="font-size:0.75rem; color:#888">${drive.device} (${drive.fstype})</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted)">${drive.device} (${drive.fstype})</div>
                     </div>
                 </div>
             </td>
@@ -98,7 +158,7 @@ function renderDriveTable(drives) {
                         <span>${usedGB} / ${totalGB} GB</span>
                         <span>${percent}%</span>
                     </div>
-                    <div style="height:6px; background:rgba(255,255,255,0.1); border-radius:3px; overflow:hidden">
+                    <div style="height:6px; background:var(--glass-border); border-radius:3px; overflow:hidden">
                         <div style="width:${percent}%; height:100%; background:${barColor}"></div>
                     </div>
                 </div>
@@ -172,8 +232,9 @@ function buildSidebarTree() {
         });
 }
 
-function loadFiles(path, page = 1) {
+function loadFiles(path, page = 1, addHistory = true) {
     viewMode = 'files';
+    if (page === 1 && addHistory) pushHistory(path);
     if (page === 1) {
         document.getElementById('file-list').innerHTML = '';
         document.getElementById('status-text').textContent = 'Loading...';
@@ -190,7 +251,7 @@ function loadFiles(path, page = 1) {
             isLoading = false;
 
             if (data.error) {
-                alert("Error: " + data.error);
+                showToast("Error: " + data.error, 'error');
                 return;
             }
 
@@ -311,7 +372,7 @@ function renderTable(items, isNew) {
         tr.innerHTML = `
             <td><span class="fm-icon ${item.is_dir ? 'dir' : 'file'}"><i class="fa-solid ${iconClass.split(' ')[0]}"></i></span>${item.name}</td>
             <td>${item.size}</td>
-            <td style="font-family:monospace; color:#888">${item.perm || '-'}</td>
+            <td style="font-family:monospace; color:var(--text-muted)">${item.perm || '-'}</td>
             <td style="color:var(--text-muted)">${item.date}</td>
         `;
         tbody.appendChild(tr);
@@ -380,6 +441,10 @@ function hideContextMenu() {
 
 // Actions
 function createNew(type) {
+    if (currentPath === 'drives://') {
+        showToast('Open a folder before creating items', 'warning');
+        return;
+    }
     const name = prompt(`Enter name for new ${type}:`);
     if (!name) return;
 
@@ -439,6 +504,10 @@ function copyItem(op) {
 function pasteItem() {
     hideContextMenu();
     if (!clipboard) return;
+    if (currentPath === 'drives://') {
+        showToast('Open a folder before pasting', 'warning');
+        return;
+    }
 
     fetch('/api/files/action', {
         method: 'POST',
@@ -453,16 +522,21 @@ function pasteItem() {
         if (data.success) {
             clipboard = null;
             loadFiles(currentPath);
+            showToast('Pasted');
         } else {
-            alert("Paste failed: " + (data.error || 'Unknown'));
+            showToast("Paste failed: " + (data.error || 'Unknown'), 'error');
         }
     });
 }
 
 function refreshAfterAction(res) {
     res.json().then(data => {
-        if (data.success) loadFiles(currentPath);
-        else alert("Action failed: " + (data.error || 'Unknown'));
+        if (data.success) {
+            loadFiles(currentPath);
+            showToast('Done');
+        } else {
+            showToast("Action failed: " + (data.error || 'Unknown'), 'error');
+        }
     });
 }
 
@@ -515,10 +589,10 @@ function saveFile() {
         })
     }).then(r => r.json()).then(data => {
         if (data.success) {
-            alert("Saved!");
+            showToast("Saved");
             closeEditor();
         } else {
-            alert("Error: " + data.error);
+            showToast("Error: " + data.error, 'error');
         }
     });
 }
@@ -574,6 +648,11 @@ function openInTerminal() {
 // Upload Files
 function uploadFiles(files) {
     if (!files || files.length === 0) return;
+    if (currentPath === 'drives://') {
+        showToast('Open a folder before uploading', 'warning');
+        document.getElementById('upload-input').value = '';
+        return;
+    }
 
     const formData = new FormData();
     formData.append('path', currentPath);
@@ -592,14 +671,14 @@ function uploadFiles(files) {
         .then(r => r.json())
         .then(data => {
             if (data.success) {
-                alert(`Uploaded: ${data.files.join(', ')}`);
+                showToast(`Uploaded ${data.files.length} file(s)`);
                 loadFiles(currentPath);
             } else {
-                alert('Upload failed: ' + (data.error || 'Unknown'));
+                showToast('Upload failed: ' + (data.error || 'Unknown'), 'error');
             }
         })
         .catch(err => {
-            alert('Upload error: ' + err);
+            showToast('Upload error: ' + err, 'error');
         })
         .finally(() => {
             // Reset input
@@ -610,14 +689,41 @@ function uploadFiles(files) {
 // Download Selected File
 function downloadSelected() {
     if (!selectedItem) {
-        alert('Pilih file untuk di-download');
+        showToast('Pilih file untuk di-download', 'warning');
         return;
     }
     if (selectedItem.is_dir) {
-        alert('Tidak bisa download folder');
+        showToast('Tidak bisa download folder', 'warning');
         return;
     }
 
     // Open download in new tab
     window.open('/api/files/download?path=' + encodeURIComponent(selectedItem.path), '_blank');
+}
+
+function setupDragDropUpload() {
+    const zone = document.getElementById('drop-zone');
+    if (!zone) return;
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        zone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            zone.classList.add('drag-over');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        zone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (eventName === 'dragleave' && zone.contains(e.relatedTarget)) return;
+            zone.classList.remove('drag-over');
+        });
+    });
+
+    zone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer?.files;
+        if (files && files.length) uploadFiles(files);
+    });
 }
