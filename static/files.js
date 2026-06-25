@@ -650,7 +650,7 @@ function uploadFiles(files) {
     if (!files || files.length === 0) return;
     if (currentPath === 'drives://') {
         showToast('Open a folder before uploading', 'warning');
-        document.getElementById('upload-input').value = '';
+        resetUploadInputs();
         return;
     }
 
@@ -658,32 +658,78 @@ function uploadFiles(files) {
     formData.append('path', currentPath);
 
     for (let i = 0; i < files.length; i++) {
-        formData.append('file', files[i]);
+        formData.append('files', files[i]);
+        formData.append('relative_path', files[i].webkitRelativePath || files[i].name);
     }
 
-    // Show uploading status
-    document.getElementById('status-text').textContent = `Uploading ${files.length} file(s)...`;
+    setUploadProgress(0, `Uploading ${files.length} item(s)...`);
+    document.getElementById('status-text').textContent = `Uploading ${files.length} item(s)...`;
 
-    fetch('/api/files/upload', {
-        method: 'POST',
-        body: formData
-    })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                showToast(`Uploaded ${data.files.length} file(s)`);
-                loadFiles(currentPath);
-            } else {
-                showToast('Upload failed: ' + (data.error || 'Unknown'), 'error');
-            }
-        })
-        .catch(err => {
-            showToast('Upload error: ' + err, 'error');
-        })
-        .finally(() => {
-            // Reset input
-            document.getElementById('upload-input').value = '';
-        });
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/files/upload');
+
+    xhr.upload.onprogress = (event) => {
+        if (!event.lengthComputable) return;
+        const percent = Math.round((event.loaded / event.total) * 100);
+        setUploadProgress(percent, `Uploading ${files.length} item(s)...`);
+    };
+
+    xhr.onload = () => {
+        let data = {};
+        try {
+            data = JSON.parse(xhr.responseText || '{}');
+        } catch (e) {
+            data = { error: xhr.responseText || 'Invalid response' };
+        }
+
+        if (xhr.status >= 200 && xhr.status < 300 && data.success) {
+            setUploadProgress(100, 'Upload complete');
+            showToast(`Uploaded ${data.count || data.files?.length || files.length} item(s)`);
+            loadFiles(currentPath);
+        } else {
+            showToast('Upload failed: ' + (data.error || xhr.statusText || 'Unknown'), 'error');
+        }
+    };
+
+    xhr.onerror = () => {
+        showToast('Upload error: connection failed', 'error');
+    };
+
+    xhr.onloadend = () => {
+        setTimeout(() => hideUploadProgress(), 900);
+        resetUploadInputs();
+    };
+
+    xhr.send(formData);
+}
+
+function setUploadProgress(percent, label) {
+    const wrapper = document.getElementById('upload-progress');
+    const fill = document.getElementById('upload-progress-fill');
+    const text = document.getElementById('upload-percent');
+    const labelEl = document.getElementById('upload-label');
+    if (!wrapper || !fill || !text || !labelEl) return;
+
+    wrapper.classList.add('active');
+    fill.style.width = `${Math.max(0, Math.min(100, percent))}%`;
+    text.textContent = `${Math.max(0, Math.min(100, percent))}%`;
+    labelEl.textContent = label;
+}
+
+function hideUploadProgress() {
+    const wrapper = document.getElementById('upload-progress');
+    const fill = document.getElementById('upload-progress-fill');
+    const text = document.getElementById('upload-percent');
+    if (wrapper) wrapper.classList.remove('active');
+    if (fill) fill.style.width = '0%';
+    if (text) text.textContent = '0%';
+}
+
+function resetUploadInputs() {
+    const fileInput = document.getElementById('upload-input');
+    const folderInput = document.getElementById('upload-folder-input');
+    if (fileInput) fileInput.value = '';
+    if (folderInput) folderInput.value = '';
 }
 
 // Download Selected File

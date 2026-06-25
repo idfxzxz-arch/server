@@ -103,7 +103,7 @@ HOME_DEVICES_STATE = {}
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', os.urandom(24).hex())
 app.config['UPLOAD_FOLDER'] = DATA_DIR
-app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB Limit
+app.config['MAX_CONTENT_LENGTH'] = int(os.environ.get('FILE_UPLOAD_LIMIT_MB', '2048')) * 1024 * 1024
 
 # ==============================================
 CORS(app, supports_credentials=True)
@@ -4815,30 +4815,46 @@ def files_upload_endpoint():
         dest_path = request.form.get('path', '/')
         if not os.path.exists(dest_path):
              return jsonify({'error': 'Path not found'}), 404
+        if not os.path.isdir(dest_path):
+             return jsonify({'error': 'Upload destination must be a directory'}), 400
              
-        if 'file' not in request.files:
+        files = request.files.getlist('files') or request.files.getlist('file')
+        if not files:
              return jsonify({'error': 'No files'}), 400
              
         uploaded = []
-        files = request.files.getlist('file')
+        relative_paths = request.form.getlist('relative_path')
         
-        for f in files:
+        for index, f in enumerate(files):
             if f.filename:
-                fname = secure_filename(f.filename)
-                save_path = os.path.join(dest_path, fname)
+                raw_relative_path = relative_paths[index] if index < len(relative_paths) else f.filename
+                safe_parts = [
+                    secure_filename(part)
+                    for part in raw_relative_path.replace('\\', '/').split('/')
+                    if part and part not in ('.', '..')
+                ]
+                if not safe_parts:
+                    safe_parts = [secure_filename(f.filename)]
+
+                fname = safe_parts[-1] or secure_filename(f.filename)
+                relative_dir = os.path.join(*safe_parts[:-1]) if len(safe_parts) > 1 else ''
+                target_dir = os.path.join(dest_path, relative_dir)
+                os.makedirs(target_dir, exist_ok=True)
+
+                save_path = os.path.join(target_dir, fname)
                 
                 # Auto rename if exists
                 counter = 1
                 name, ext = os.path.splitext(fname)
                 while os.path.exists(save_path):
-                    save_path = os.path.join(dest_path, f"{name}_{counter}{ext}")
+                    save_path = os.path.join(target_dir, f"{name}_{counter}{ext}")
                     counter += 1
                     
                 f.save(save_path)
-                uploaded.append(os.path.basename(save_path))
+                uploaded.append(os.path.relpath(save_path, dest_path))
                 
         audit_log('FILES', f"Uploaded {len(uploaded)} files to {dest_path}", session.get('username'))
-        return jsonify({'success': True, 'files': uploaded})
+        return jsonify({'success': True, 'files': uploaded, 'count': len(uploaded)})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

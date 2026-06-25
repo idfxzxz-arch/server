@@ -487,6 +487,36 @@
             display: grid;
         }
 
+        .upload-progress {
+            display: none;
+            align-items: center;
+            gap: 0.7rem;
+            padding: 0.52rem 0.85rem;
+            border-bottom: 1px solid var(--fm-line);
+            background: color-mix(in srgb, var(--surface) 80%, transparent);
+            color: var(--text-soft);
+            font-size: 0.82rem;
+        }
+
+        .upload-progress.active {
+            display: flex;
+        }
+
+        .upload-progress-track {
+            flex: 1;
+            height: 7px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: var(--glass-border);
+        }
+
+        .upload-progress-fill {
+            width: 0%;
+            height: 100%;
+            background: var(--accent);
+            transition: width 0.18s ease;
+        }
+
         .fm-toast {
             position: fixed;
             right: 1rem;
@@ -602,12 +632,24 @@
                         <button class="fm-btn" onclick="createNew('folder')" title="New folder"><i class="fa-solid fa-folder-plus"></i></button>
                         <button class="fm-btn" onclick="createNew('file')" title="New file"><i class="fa-solid fa-file-circle-plus"></i></button>
                         <input type="file" id="upload-input" multiple style="display:none" onchange="uploadFiles(this.files)">
+                        <input type="file" id="upload-folder-input" multiple webkitdirectory directory style="display:none" onchange="uploadFiles(this.files)">
                         <button class="fm-btn primary" onclick="document.getElementById('upload-input').click()">
-                            <i class="fa-solid fa-upload"></i> Upload
+                            <i class="fa-solid fa-upload"></i> Files
+                        </button>
+                        <button class="fm-btn" onclick="document.getElementById('upload-folder-input').click()" title="Upload folder">
+                            <i class="fa-solid fa-folder-arrow-up"></i> Folder
                         </button>
                         <button class="fm-btn" onclick="downloadSelected()" title="Download"><i class="fa-solid fa-download"></i></button>
                         <button class="fm-btn" onclick="copyCurrentPath()" title="Copy path"><i class="fa-solid fa-link"></i></button>
                     </div>
+                </div>
+
+                <div class="upload-progress" id="upload-progress">
+                    <span id="upload-label">Uploading...</span>
+                    <div class="upload-progress-track">
+                        <div class="upload-progress-fill" id="upload-progress-fill"></div>
+                    </div>
+                    <span id="upload-percent">0%</span>
                 </div>
 
                 <!-- File Table -->
