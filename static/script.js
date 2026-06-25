@@ -614,21 +614,23 @@ function loadDashboardApps() {
 function renderDashboardApps(apps) {
     const grid = document.getElementById('apps-grid');
     const iconTheme = {
-        files: { icon: 'fa-solid fa-face-smile', bg: 'linear-gradient(135deg,#38bdf8,#2563eb 52%,#1e40af)' },
-        terminal: { icon: 'fa-solid fa-terminal', bg: 'linear-gradient(135deg,#111827,#334155 58%,#020617)' },
-        docker: { icon: 'fa-brands fa-docker', bg: 'linear-gradient(135deg,#60a5fa,#0284c7 58%,#075985)' },
-        metrics: { icon: 'fa-solid fa-chart-line', bg: 'linear-gradient(135deg,#facc15,#f97316 58%,#b45309)' },
-        security: { icon: 'fa-solid fa-shield-halved', bg: 'linear-gradient(135deg,#fb7185,#e11d48 58%,#9f1239)' },
-        network: { icon: 'fa-solid fa-network-wired', bg: 'linear-gradient(135deg,#34d399,#10b981 52%,#047857)' },
-        storage: { icon: 'fa-solid fa-hard-drive', bg: 'linear-gradient(135deg,#a78bfa,#6366f1 58%,#4338ca)' },
-        websites: { icon: 'fa-solid fa-compass', bg: 'linear-gradient(135deg,#67e8f9,#06b6d4 52%,#0e7490)' },
-        store: { icon: 'fa-solid fa-bag-shopping', bg: 'linear-gradient(135deg,#fda4af,#fb7185 56%,#be123c)' },
-        vpn: { icon: 'fa-solid fa-lock', bg: 'linear-gradient(135deg,#86efac,#22c55e 55%,#15803d)' },
-        backup: { icon: 'fa-solid fa-clock-rotate-left', bg: 'linear-gradient(135deg,#f9a8d4,#ec4899 55%,#be185d)' },
-        settings: { icon: 'fa-solid fa-gear', bg: 'linear-gradient(135deg,#cbd5e1,#64748b 58%,#334155)' },
-        monitoring: { icon: 'fa-solid fa-display', bg: 'linear-gradient(135deg,#93c5fd,#3b82f6 56%,#1d4ed8)' },
-        lxd: { icon: 'fa-brands fa-linux', bg: 'linear-gradient(135deg,#fcd34d,#f97316 56%,#c2410c)' },
-        default: { icon: 'fa-solid fa-circle-nodes', bg: 'linear-gradient(135deg,#94a3b8,#475569 58%,#1f2937)' }
+        files: { label: 'Finder', icon: 'fa-solid fa-folder-open', bg: 'linear-gradient(135deg,#67e8f9 0%,#38bdf8 45%,#2563eb 100%)' },
+        terminal: { label: 'Terminal', icon: 'fa-solid fa-terminal', bg: 'linear-gradient(135deg,#374151 0%,#111827 62%,#020617 100%)' },
+        docker: { label: 'Containers', icon: 'fa-brands fa-docker', bg: 'linear-gradient(135deg,#7dd3fc 0%,#0ea5e9 48%,#0369a1 100%)' },
+        metrics: { label: 'Activity', icon: 'fa-solid fa-chart-line', bg: 'linear-gradient(135deg,#fde68a 0%,#f59e0b 54%,#ea580c 100%)' },
+        security: { label: 'Shield', icon: 'fa-solid fa-shield-halved', bg: 'linear-gradient(135deg,#fda4af 0%,#f43f5e 55%,#be123c 100%)' },
+        network: { label: 'Network', icon: 'fa-solid fa-sitemap', bg: 'linear-gradient(135deg,#99f6e4 0%,#14b8a6 55%,#0f766e 100%)' },
+        storage: { label: 'Disk', icon: 'fa-solid fa-hard-drive', bg: 'linear-gradient(135deg,#c4b5fd 0%,#7c3aed 58%,#4c1d95 100%)' },
+        websites: { label: 'Browser', icon: 'fa-solid fa-compass', bg: 'linear-gradient(135deg,#a5f3fc 0%,#06b6d4 52%,#0e7490 100%)' },
+        store: { label: 'Store', icon: 'fa-solid fa-bag-shopping', bg: 'linear-gradient(135deg,#fbcfe8 0%,#ec4899 55%,#be185d 100%)' },
+        'mobile-backup': { label: 'Mobile', icon: 'fa-solid fa-mobile-screen-button', bg: 'linear-gradient(135deg,#bae6fd 0%,#0ea5e9 55%,#1d4ed8 100%)' },
+        vpn: { label: 'VPN', icon: 'fa-solid fa-lock', bg: 'linear-gradient(135deg,#bbf7d0 0%,#22c55e 55%,#15803d 100%)' },
+        backup: { label: 'Backup', icon: 'fa-solid fa-clock-rotate-left', bg: 'linear-gradient(135deg,#f9a8d4 0%,#ec4899 55%,#be185d 100%)' },
+        settings: { label: 'Settings', icon: 'fa-solid fa-gear', bg: 'linear-gradient(135deg,#e2e8f0 0%,#94a3b8 52%,#475569 100%)' },
+        monitoring: { label: 'Console', icon: 'fa-solid fa-display', bg: 'linear-gradient(135deg,#bfdbfe 0%,#3b82f6 56%,#1d4ed8 100%)' },
+        lxd: { label: 'Machines', icon: 'fa-brands fa-linux', bg: 'linear-gradient(135deg,#fed7aa 0%,#f97316 56%,#c2410c 100%)' },
+        sharing: { label: 'Share', icon: 'fa-solid fa-share-nodes', bg: 'linear-gradient(135deg,#ddd6fe 0%,#8b5cf6 54%,#5b21b6 100%)' },
+        default: { label: null, icon: 'fa-solid fa-circle-nodes', bg: 'linear-gradient(135deg,#cbd5e1 0%,#64748b 58%,#334155 100%)' }
     };
 
     const getIconTheme = (app) => {
@@ -637,14 +639,18 @@ function renderDashboardApps(apps) {
         return iconTheme[key] || iconTheme[name] || iconTheme.default;
     };
 
-    grid.innerHTML = apps.map(app => `
-        <div class="app-item glass" draggable="true" data-id="${app.id}" onclick="handleAppClick(event, '${app.url}')">
-            <div class="app-icon" style="background: ${getIconTheme(app).bg};">
-                ${app.icon && app.icon.startsWith('/') ? `<img src="${app.icon}" style="width:68%;height:68%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))">` : `<i class="${getIconTheme(app).icon || (app.icon && app.icon.startsWith('fa') ? app.icon : 'fa-solid fa-' + app.icon)}"></i>`}
+    grid.innerHTML = apps.map(app => {
+        const theme = getIconTheme(app);
+        const label = theme.label || app.name;
+        return `
+        <div class="app-item glass" draggable="true" data-id="${app.id}" title="${label}" onclick="handleAppClick(event, '${app.url}')">
+            <div class="app-icon" style="background: ${theme.bg};">
+                ${app.icon && app.icon.startsWith('/') ? `<img src="${app.icon}" style="width:68%;height:68%;object-fit:contain;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))">` : `<i class="${theme.icon || (app.icon && app.icon.startsWith('fa') ? app.icon : 'fa-solid fa-' + app.icon)}"></i>`}
             </div>
-            <span class="app-name">${app.name}</span>
+            <span class="app-name">${label}</span>
         </div>
-    `).join('');
+    `;
+    }).join('');
 
     // Attach DnD Handlers
     const items = grid.querySelectorAll('.app-item');
@@ -678,8 +684,8 @@ function handleAppClick(e, url) {
 function initMacDock(dock) {
     const items = Array.from(dock.querySelectorAll('.app-item'));
     const reset = () => items.forEach(item => item.style.setProperty('--dock-scale', '1'));
-    const maxScale = window.innerWidth < 640 ? 1.35 : 1.82;
-    const effectWidth = window.innerWidth < 640 ? 180 : 300;
+    const maxScale = window.innerWidth < 640 ? 1.18 : 1.34;
+    const effectWidth = window.innerWidth < 640 ? 130 : 220;
 
     dock.addEventListener('mousemove', (event) => {
         items.forEach(item => {

@@ -443,12 +443,12 @@ html[data-theme="dark"] .top-bar {
     gap: clamp(0.28rem, 0.65vw, 0.58rem);
     width: auto;
     max-width: min(calc(100vw - 1.2rem), 1040px);
-    min-height: 82px;
-    padding: 0.72rem 0.82rem 0.58rem;
+    min-height: 94px;
+    padding: 0.62rem 0.78rem 0.56rem;
     transform: translateX(-50%);
     background: var(--dock-bg);
     border: 1px solid var(--dock-border);
-    border-radius: 26px;
+    border-radius: 24px;
     box-shadow:
         0 22px 60px rgba(15, 23, 42, 0.28),
         inset 0 1px 0 rgba(255, 255, 255, 0.42),
@@ -468,25 +468,25 @@ html[data-theme="dark"] .top-bar {
     justify-content: flex-end;
     padding: 0;
     cursor: pointer;
-    gap: 0.34rem;
-    min-height: 62px;
-    min-width: calc(54px * var(--dock-scale));
+    gap: 0.28rem;
+    min-height: 78px;
+    min-width: calc(64px * var(--dock-scale));
     background: transparent;
     border: 0;
     box-shadow: none;
-    transform: translateY(calc((1 - var(--dock-scale)) * 9px));
+    transform: translateY(calc((1 - var(--dock-scale)) * 7px));
     transform-origin: bottom center;
     transition: min-width 0.12s ease, transform 0.12s ease;
 }
 
 .app-icon {
-    width: calc(54px * var(--dock-scale));
-    height: calc(54px * var(--dock-scale));
-    border-radius: calc(13px * var(--dock-scale));
+    width: calc(48px * var(--dock-scale));
+    height: calc(48px * var(--dock-scale));
+    border-radius: calc(12px * var(--dock-scale));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: calc(1.42rem * var(--dock-scale));
+    font-size: calc(1.28rem * var(--dock-scale));
     color: white;
     position: relative;
     overflow: hidden;
@@ -514,27 +514,28 @@ html[data-theme="dark"] .top-bar {
 }
 
 .app-name {
-    position: absolute;
-    bottom: calc(100% + 0.72rem);
-    left: 50%;
-    transform: translateX(-50%) translateY(4px);
-    opacity: 0;
+    position: static;
+    transform: none;
+    opacity: 1;
     pointer-events: none;
-    padding: 0.34rem 0.54rem;
-    border-radius: 7px;
-    background: var(--dock-label);
-    color: #fff;
+    padding: 0;
+    max-width: 68px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.92);
     font-weight: 700;
-    font-size: 0.76rem;
+    font-size: 0.62rem;
+    line-height: 1.1;
     text-align: center;
-    white-space: nowrap;
-    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.18);
-    transition: opacity 0.12s ease, transform 0.12s ease;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+    transition: color 0.12s ease, transform 0.12s ease;
 }
 
 .app-item:hover .app-name {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    color: #fff;
+    transform: translateY(-1px);
 }
 
 .app-item::after {
@@ -542,8 +543,8 @@ html[data-theme="dark"] .top-bar {
     width: 4px;
     height: 4px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.88);
-    opacity: 0.68;
+    background: rgba(255, 255, 255, 0.82);
+    opacity: 0.56;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.22);
 }
 
@@ -603,13 +604,18 @@ html[data-theme="dark"] .top-bar {
     }
 
     .app-item {
-        min-width: calc(46px * var(--dock-scale));
+        min-width: calc(54px * var(--dock-scale));
     }
 
     .app-icon {
-        width: calc(46px * var(--dock-scale));
-        height: calc(46px * var(--dock-scale));
-        font-size: calc(1.18rem * var(--dock-scale));
+        width: calc(42px * var(--dock-scale));
+        height: calc(42px * var(--dock-scale));
+        font-size: calc(1.08rem * var(--dock-scale));
+    }
+
+    .app-name {
+        max-width: 56px;
+        font-size: 0.56rem;
     }
 }
 
